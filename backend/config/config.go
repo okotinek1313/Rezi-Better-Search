@@ -11,9 +11,9 @@ type Config struct {
 }
 
 func Create() {
-	os.MkdirAll("../../shared", 0755)
-	if _, err := os.Stat("../../shared/config.json"); os.IsNotExist(err) {
-		file, err := os.Create("../../shared/config.json")
+	os.MkdirAll("../shared", 0755)
+	if _, err := os.Stat("../shared/config.json"); os.IsNotExist(err) {
+		file, err := os.Create("../shared/config.json")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -22,7 +22,7 @@ func Create() {
 }
 
 func Read() Config {
-	file, err := os.Open("../../shared/config.json")
+	file, err := os.Open("../shared/config.json")
 	if err != nil {
 		return Config{}
 	}
