@@ -1,16 +1,20 @@
 package requestHandler
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"rezi-better-search/api"
 	"rezi-better-search/config"
 )
 
 var Port_config config.Config
 
 func RequestHandler() {
+	http.HandleFunc("/search", searchHandler)
+
 	existing := config.Read()
 
 	var listener net.Listener
@@ -42,4 +46,11 @@ func getListener() (net.Listener, int) {
 		log.Fatal(err)
 	}
 	return listener, listener.Addr().(*net.TCPAddr).Port
+}
+
+func searchHandler(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("q")
+	api.Search(query)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"query": query})
 }
