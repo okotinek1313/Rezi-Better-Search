@@ -21,16 +21,13 @@ func RequestHandler() {
 	var port int
 
 	if existing.Port != 0 {
-		// use existing port
 		port = existing.Port
 		var err error
 		listener, err = net.Listen("tcp", fmt.Sprintf(":%d", port))
 		if err != nil {
-			// port is taken get a new one
 			listener, port = getListener()
 		}
 	} else {
-		// no port in config get a new one
 		listener, port = getListener()
 	}
 
@@ -49,8 +46,13 @@ func getListener() (net.Listener, int) {
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	query := r.URL.Query().Get("q")
-	api.Search(query)
+	result, err := api.Search(query)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"query": query})
+	json.NewEncoder(w).Encode(result)
 }
