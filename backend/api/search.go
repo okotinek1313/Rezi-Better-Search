@@ -5,35 +5,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"rezi-better-search/models"
+	"rezi-better-search/parser"
 	"strings"
 )
 
-type Hit struct {
-	Id       string      `json:"id"`
-	Bios     interface{} `json:"bios"`
-	Core     interface{} `json:"core"`
-	Icon     string      `json:"icon"`
-	Link     string      `json:"link"`
-	Playable string      `json:"playable"`
-	System   string      `json:"system"`
-	Title    string      `json:"title"`
-	IgdbUrl  string      `json:"igdb_url"`
-	Site     string      `json:"site"`
-}
-
-type SearchResult struct {
-	Hits               []Hit  `json:"hits"`
-	Query              string `json:"query"`
-	ProcessingTimeMs   int    `json:"processingTimeMs"`
-	Limit              int    `json:"limit"`
-	Offset             int    `json:"offset"`
-	EstimatedTotalHits int    `json:"estimatedTotalHits"`
-}
-
-func Search(query string) (SearchResult, error) {
+func Search(query string) (parser.ParsedResult, error) {
 	url := "https://search.rezi.one/indexes/rezi/search"
 
-	payload := strings.NewReader(fmt.Sprintf(`{"q":"%s","limit":20}`, query))
+	payload := strings.NewReader(fmt.Sprintf(`{"q":"%s","limit":50}`, query))
 
 	req, _ := http.NewRequest("POST", url, payload)
 	req.Header.Add("Content-Type", "application/json")
@@ -45,8 +25,10 @@ func Search(query string) (SearchResult, error) {
 
 	body, _ := io.ReadAll(res.Body)
 
-	var result SearchResult
+	var result models.SearchResult
 	err := json.Unmarshal(body, &result)
 
-	return result, err
+	parsed := parser.Parse(result)
+
+	return parsed, err
 }
